@@ -8,24 +8,30 @@ IP = STDIN.gets.chomp
 puts "Enter message to send: "
 message = STDIN.gets.chomp
 
-puts "Number of times to send: "
+puts "Number of times to send message: "
 numMsg = STDIN.gets.chomp.to_i
 
+puts "Number of clients to create: "
+numOfClients = STDIN.gets.chomp.to_i
 
-begin
-	socket = TCPSocket.open(IP, 8000)
-rescue Exception => e 
-	puts "error: #{e.message}"
-	exit
-end
-begin
-	(1..numMsg).each do |i|
-		socket.puts message
-		resp = socket.readline
-		puts resp
+threads = (1..numOfClients).map do |t|
+	Thread.new(t) do |t|
+		begin
+			socket = TCPSocket.open(IP, 8005)
+		rescue Exception => e 
+			puts "error: #{e.message}"
+			exit
+		end
+		begin
+			(1..numMsg).each do |i|
+				socket.puts message
+				resp = socket.readline
+				puts resp
+			end
+		rescue Exception => e
+			puts "error: #{e.message}"
+		end
 	end
-rescue Exception => e
-	puts "error: #{e.message}"
 end
 
 puts "Enter exit to close client.."
