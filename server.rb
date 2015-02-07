@@ -1,28 +1,39 @@
-#!/user/bin/ruby
-
 require 'socket'
-require 'thread'
 
-puts "Starting Server.."
+DEFAULT_PORT = 8005
 
-server = TCPServer.new(8005)
+server = TCPServer.new(DEFAULT_PORT)
+
+
+ ip = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
+port = server.addr[1].to_s
+
+
+puts "Ready to receive on "+ ip +":" + port
+
 @numOfClients = 0
 
-while(session = server.accept)
-    Thread.start do
-        puts "Connection from: #{session.peeraddr[2]}"
-        @numOfClients = @numOfClients + 1
-        puts "Number of clients connected: #{@numOfClients}"
-        begin
-            loop do
-                message = session.gets
-                puts "CLIENT > #{message}"
-                session.puts "SERVER > #{message}"
-            end
-        rescue EOFError
-            session.close
-            @numOfClients = @numOfClients -1
-            puts "Number of clients connected: #{@numOfClients}"
-        end
+
+
+while (connection = server.accept)
+  Thread.new(connection) do |conn|
+    port, host = conn.peeraddr[1,2]
+    client = "#{host}:#{port}"
+    puts "#{client} is connected"
+    @numOfClients = @numOfClients + 1
+    puts "Clients currently connected: #{@numOfClients}"
+    begin
+      loop do
+        message = conn.readline
+        puts "#{client} says: #{message}"
+        conn.puts(message)
+      end
+    rescue EOFError
+      conn.close
+      @numOfClients = @numOfClients - 1
+    
+      puts "#{client} has disconnected"
+        puts "Clients currently connected: #{@numOfClients}"
     end
+  end
 end

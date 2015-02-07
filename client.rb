@@ -2,6 +2,9 @@
 
 require 'socket'
 
+puts "Enter IP Address: "
+IP = STDIN.gets.chomp
+
 puts "Enter message to send: "
 message = STDIN.gets.chomp
 
@@ -10,7 +13,7 @@ numMsg = STDIN.gets.chomp.to_i
 
 
 begin
-	socket = TCPSocket.open("localhost", 8000)
+	socket = TCPSocket.open(IP, 8000)
 rescue Exception => e 
 	puts "error: #{e.message}"
 	exit
@@ -23,7 +26,12 @@ begin
 	end
 rescue Exception => e
 	puts "error: #{e.message}"
-ensure
+end
+
+puts "Enter exit to close client.."
+close = STDIN.gets.chomp
+if close.include? ("exit")
+	puts "closing connection"
 	socket.close
 end
 
