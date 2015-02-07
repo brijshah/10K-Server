@@ -29,7 +29,6 @@ while (connection = server.accept)
     client = "#{host}:#{port}"
     puts "#{client} is connected"
     @numOfClients = @numOfClients + 1
-    #puts "Clients currently connected: #{@numOfClients}"
     begin
       loop do
         message = conn.readline
@@ -41,7 +40,6 @@ while (connection = server.accept)
       @numOfClients = @numOfClients - 1
     
       puts "#{client} has disconnected"
-      #puts "Clients currently connected: #{@numOfClients}"
     end
   end
 end
