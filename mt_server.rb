@@ -5,7 +5,7 @@ DEFAULT_PORT = 8005
 server = TCPServer.new(DEFAULT_PORT)
 
 
-ip = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
+SRV_IP = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
 port = server.addr[1].to_s
 @numOfClients = 0
 
@@ -13,13 +13,13 @@ port = server.addr[1].to_s
 def checkConnected
   var = Thread.new{
     while(true)
-      sleep 15
+      sleep 5
       puts "Clients currently connected: #{@numOfClients}"
     end
   }
 end
 
-puts "Ready to receive on "+ ip +":" + port
+puts "Server started: #{SRV_IP}:#{port}"
 
 checkConnected
 
@@ -33,6 +33,7 @@ while (connection = server.accept)
       loop do
         message = conn.readline
         puts "#{client} says: #{message}"
+        sleep(0.9)
         conn.puts(message)
       end
     rescue EOFError
