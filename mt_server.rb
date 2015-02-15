@@ -1,4 +1,5 @@
 require 'socket'
+require 'logger'
 
 #---Variables
 DEFAULT_PORT = 8005
@@ -24,6 +25,11 @@ def closeConnection( clientSock, clientConnections)
 	clientConnections.delete(clientSock)
 end
 
+#-- Prints exception to STDOUT
+def print_exception(e)
+	puts "error: #{e.message}"
+end
+
 #---Main
 begin
 	puts "Server started on Port: #{DEFAULT_PORT}"
@@ -46,11 +52,11 @@ begin
 			end
 		end
 	end
-rescue SystemExit, Interrupt
+rescue SystemExit, Interrupt #---Catches Ctrl-C
 	system( "clear" )
 	puts "User shutdown detected."
 rescue Exception => e
-	puts "Exception: #{e.message}"
+	print_exception(e)
 end
 
 

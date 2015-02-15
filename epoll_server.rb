@@ -2,11 +2,18 @@ require 'socket'
 require 'thread'
 require 'eventmachine'
 require 'rubygems'
+require 'logger'
 
 #---Variables
 DEFAULT_PORT = 8005
 HOST = 'localhost'
 
+#---Prints exception to STDOUT
+def print_exception(e)
+	puts "error: #{e.message}"
+end
+
+#---Module used with eventmachine. Provides common namespace for methods used with EM.
 module EchoServer
 	$clients = 0
 
@@ -28,7 +35,7 @@ end
 begin
 	new_size = EM.set_descriptor_table_size( 10000 )
 rescue Exception => e
-	puts "Error: #{e.message}"
+	print_exception(e)
 end
 
 #---Main
@@ -38,8 +45,8 @@ begin
 		EventMachine.start_server '0.0.0.0', DEFAULT_PORT, EchoServer
 		puts "Server started on: #{HOST}:#{DEFAULT_PORT}"
 	}
-rescue SystemExit, Interrupt
+rescue SystemExit, Interrupt #---Catches Ctrl-C
 	system( "clear" )
 rescue Exception => e
-	puts "Error: #{e.message}"
+	print_exception(e)
 end

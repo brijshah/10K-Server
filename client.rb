@@ -1,27 +1,33 @@
 require "socket"
 require 'thread'
 require 'thwait'
+require 'logger'
 
 
-
+#---Variables
 $totalClients = Integer(ARGV[1])
 $ip = ARGV[0] 
 $i = 0
 threads = Array::new
 
 
+#---Prints exception to STDOUT
+def print_exception(e)
+	puts "error: #{e.message}"
+end
+
 while $i < $totalClients
 	puts $i += 1
 	threads = Thread.fork() do
 		begin
-			server = TCPSocket.open($ip, 8005)
-			server.puts "hello world, goodbye"
-			line = server.gets
+			socket = TCPSocket.open($ip, 8005)
+			socket.puts "hello world, goodbye"
+			line = socket.gets
 			puts line
 			sleep
-			#server.close
+			#socket.close
 		rescue Exception => e 
-			puts "Exception:: " + e.message + "\n"
+			print_exception(e)
 			exit
 		end
 	end
