@@ -1,46 +1,33 @@
-#!/usr/bin/ruby
-
-require 'socket'
+require "socket"
 require 'thread'
+require 'thwait'
 
-puts "Enter IP Address: "
-IP = STDIN.gets.chomp
 
-puts "Enter message to send: "
-message = STDIN.gets.chomp
 
-puts "Number of times to send message: "
-numMsg = STDIN.gets.chomp.to_i
+$totalClients = Integer(ARGV[1])
+$ip = ARGV[0] 
+$i = 0
+threads = Array::new
 
-puts "Number of clients to create: "
-numOfClients = STDIN.gets.chomp.to_i
 
-threads = (1..numOfClients).map do |t|
-	Thread.new(t) do |t|
+while $i < $totalClients
+	puts $i += 1
+	threads = Thread.fork() do
 		begin
-			@socket = TCPSocket.open(IP, 8005)
+			server = TCPSocket.open($ip, 8005)
+			server.puts "hello world, goodbye"
+			line = server.gets
+			puts line
+			sleep
+			#server.close
 		rescue Exception => e 
-			puts "error: #{e.message}"
+			puts "Exception:: " + e.message + "\n"
 			exit
 		end
-		begin
-			(1..numMsg).each do |i|
-				@socket.puts message
-				resp = @socket.readline
-				puts resp
-			end
-		rescue Exception => e
-			puts "error1: #{e.message}"
-		end
 	end
+	sleep(0.005)
 end
 
-threads.each {|t| t.join}
+STDIN.gets
 
-puts "Enter exit to close client(s).."
-close = STDIN.gets.chomp
-if close.include? ("exit")
-	puts "closing connection"
-	@socket.close
-end
-
+ThreadsWait.all_waits(*threads)

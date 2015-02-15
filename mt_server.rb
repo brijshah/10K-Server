@@ -1,46 +1,56 @@
 require 'socket'
 
+#---Variables
 DEFAULT_PORT = 8005
+HOST = 'localhost'
+clientConnections = []
+lock = Mutex.new
 
-server = TCPServer.new(DEFAULT_PORT)
+#---Create Server
+server = TCPServer.new( DEFAULT_PORT )
+server.setsockopt( Socket::SOL_SOCKET, Socket::SO_REUSEADDR, 1 )
 
-
-SRV_IP = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
-port = server.addr[1].to_s
-@numOfClients = 0
-
-
-def checkConnected
-  var = Thread.new{
-    while(true)
-      sleep 5
-      puts "Clients currently connected: #{@numOfClients}"
-    end
-  }
+#---Generates client name and prints
+def clientHandler(client)
+	port, host = client.peeraddr[1,2]
+	clientname = "#{host}:#{port}"
+	puts "#{clientname} is connected"
 end
 
-puts "Server started: #{SRV_IP}:#{port}"
-
-checkConnected
-
-while (connection = server.accept)
-  Thread.new(connection) do |conn|
-    port, host = conn.peeraddr[1,2]
-    client = "#{host}:#{port}"
-    puts "#{client} is connected"
-    @numOfClients = @numOfClients + 1
-    begin
-      loop do
-        message = conn.readline
-        puts "#{client} says: #{message}"
-        sleep(0.9)
-        conn.puts(message)
-      end
-    rescue EOFError
-      conn.close
-      @numOfClients = @numOfClients - 1
-    
-      puts "#{client} has disconnected"
-    end
-  end
+#---Prints amount of connections and closes socket
+def closeConnection( clientSock, clientConnections)
+	puts clientConnections.length
+	clientSock.close
+	clientConnections.delete(clientSock)
 end
+
+#---Main
+begin
+	puts "Server started on Port: #{DEFAULT_PORT}"
+	while 1
+		Thread.fork(server.accept) do |client|
+			clientHandler(client)
+			clientConnections.push(client)
+			puts "Clients connected: #{clientConnections.length}"
+			loop do
+				data = client.readline
+				puts "#{data}"
+				client.puts(data.chomp)
+
+				if client.eof?
+					lock.synchronize do
+						closeConnection( client, clientConnections)
+					end
+					break
+				end
+			end
+		end
+	end
+rescue SystemExit, Interrupt
+	system( "clear" )
+	puts "User shutdown detected."
+rescue Exception => e
+	puts "Exception: #{e.message}"
+end
+
+

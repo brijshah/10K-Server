@@ -1,58 +1,63 @@
 require 'socket'
 
+#---Variables
 DEFAULT_PORT = 8005
+HOST = 'localhost'
+fileDescriptors = []
+lock = Mutex.new
 
-@server = TCPServer.new(DEFAULT_PORT)
+#---Create Server
+server = TCPServer.new( DEFAULT_PORT )
+server.setsockopt( Socket::SOL_SOCKET, Socket::SO_REUSEADDR, 1 )
 
-SRV_IP = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
-port = @server.addr[1].to_s
-
-@numOfClients = 0
-@reading = Array.new
-
-def checkConnected
-  var = Thread.new{
-    while(true)
-      sleep 13
-      puts "Clients currently connected: #{@numOfClients}"
-    end
-  }
+#---Generates client name and prints
+def clientHandler(client)
+	port, host = client.peeraddr[1,2]
+	clientname = "#{host}:#{port}"
+	puts "#{clientname} is connected"
 end
 
-puts "Server started: #{SRV_IP}:#{port}"
+#---Prints amount of connections and closes socket
+def closeConnection( clientSock, clientConnections)
+	puts clientConnections.length
+	clientSock.close
+	clientConnections.delete(clientSock)
+end
 
-checkConnected
+fileDescriptors.push( server )
 
-@reading.push(@server)
+begin
+	puts "Server started on Port: #{DEFAULT_PORT}"
 
-while 1
-	connection = select(@reading.push)
-	if connection != nil then
+	while 1
+		connection = IO.select(fileDescriptors)
 
-		for sock in connection[0]
+		if connection != nil then
 
-			if sock == @server then
-				newSock = @server.accept()
-				@reading.push (newSock)
-				@numOfClients = (@reading.length) -1
-				puts "Clients connected: #{@numOfClients}"
-			else
-				if sock.eof?
-					sock.close
-					@reading.delete(sock)
-					@numOfClients = @reading.length
-					puts "Clients connected: #{@numOfClients}"
-					
+			for sock in connection[0]
+
+				if sock == server then
+					newSock = server.accept()
+					fileDescriptors.push( newSock )
+					puts fileDescriptors.length - 1
+
 				else
-					str = sock.gets
-					sock.puts(str)
-					puts str
+					if sock.eof?
+						closeConnection( sock, fileDescriptors)
+					else
+						str = sock.gets
+						sock.puts( str )
+						puts str
+					end
 				end
 			end
 		end
 	end
+rescue SystemExit, Interrupt #--catches Ctrl-c
+	system( "clear" )
+	puts "User shutdown detected."
+rescue Exception => e
+	puts "Error: #{e.message}"
 end
-
-
 
 
