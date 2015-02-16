@@ -3,7 +3,7 @@ require 'logger'
 
 #---Variables
 DEFAULT_PORT = 8005
-HOST = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
+HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
 fileDescriptors = []
 lock = Mutex.new
 log = Logger.new( 'select_log.txt' )
