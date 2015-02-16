@@ -7,8 +7,9 @@ require 'logger'
 #---Variables
 $totalClients = Integer(ARGV[1])
 $ip = ARGV[0] 
-$i = 0
+$var = 0
 threads = Array::new
+log = Logger.new( 'client.txt' )
 
 
 #---Prints exception to STDOUT
@@ -16,12 +17,14 @@ def print_exception(e)
 	puts "error: #{e.message}"
 end
 
-while $i < $totalClients
-	puts $i += 1
+
+#---Main
+while $var < $totalClients
+	puts $var += 1
 	threads = Thread.fork() do
 		begin
 			socket = TCPSocket.open($ip, 8005)
-			socket.puts "hello world, goodbye"
+			socket.puts "hello world, goodbye\n"
 			line = socket.gets
 			puts line
 			sleep

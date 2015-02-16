@@ -3,9 +3,10 @@ require 'logger'
 
 #---Variables
 DEFAULT_PORT = 8005
-HOST = 'localhost'
+HOST = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
 fileDescriptors = []
 lock = Mutex.new
+log = Logger.new( 'select_log.txt' )
 
 #---Create Server
 server = TCPServer.new( DEFAULT_PORT )
@@ -32,8 +33,9 @@ end
 
 fileDescriptors.push( server )
 
+#---Main
 begin
-	puts "Server started on Port: #{DEFAULT_PORT}"
+	puts "Server started on: #{HOST}:#{DEFAULT_PORT}"
 
 	while 1
 		connection = IO.select(fileDescriptors)

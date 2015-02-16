@@ -6,7 +6,8 @@ require 'logger'
 
 #---Variables
 DEFAULT_PORT = 8005
-HOST = 'localhost'
+HOST = UDPSocket.open {|s| s.connect("64.233.187.99", 1); s.addr.last}
+log = Logger.new( 'epoll_log.txt' )
 
 #---Prints exception to STDOUT
 def print_exception(e)
@@ -23,7 +24,7 @@ module EchoServer
 
 	def receive_data( data )
 		send_data data
-		puts "Client says: #{data}"
+		puts "Client says: #{data.chomp}"
 	end
 
 	def unbind
