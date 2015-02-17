@@ -1,13 +1,17 @@
+#!/usr/bin/env ruby
+
 require 'socket'
 require 'logger'
+require 'thread'
 
 #---Variables
 DEFAULT_PORT = 8005
-HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
 clientConnections = []
 lock = Mutex.new
-@totalConnected = 0
-log = Logger.new( 'mt_log.txt' )
+$totalConnected = 0
+
+#--Create log file
+log = Logger.new( "mt_log.txt" )
 
 #---Create Server
 server = TCPServer.new( DEFAULT_PORT )
@@ -33,17 +37,19 @@ def print_exception(e)
 end
 
 #---Main
+STDOUT.sync = true
+
 begin
-	puts "Server started on: #{HOST}:#{DEFAULT_PORT}"
+	puts "Multi-Threaded Server started port on: #{DEFAULT_PORT}"
 	while 1
 		Thread.fork(server.accept) do |client|
 			clientHandler(client)
 			clientConnections.push(client)
-			@totalConnected += 1
+			$totalConnected += 1
 			#puts "Clients connected: #{clientConnections.length}"
 			loop do
 				data = client.readline
-				puts "[#{@totalConnected}], Received: #{data}"
+				#puts "[#{@totalConnected}], Received: #{data}"
 				client.puts(data.chomp)
 
 				if client.eof?
@@ -57,7 +63,7 @@ begin
 	end
 rescue SystemExit, Interrupt #---Catches Ctrl-C
 	system( "clear" )
-	puts "Maximum Connections: #{@totalConnected}"
+	puts "Maximum Connections: #{$totalConnected}"
 	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)

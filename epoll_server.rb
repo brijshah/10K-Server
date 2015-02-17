@@ -1,56 +1,69 @@
+#!/usr/bin/env ruby
+
 require 'socket'
-require 'thread'
-require 'eventmachine'
 require 'rubygems'
+require 'eventmachine'
 require 'logger'
 
 #---Variables
 DEFAULT_PORT = 8005
-HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
-$totalConnected = 0
-log = Logger.new( 'epoll_log.txt' )
+$totalConnections = 0
 
-#---Prints exception to STDOUT
+#--Creating log file
+$log = Logger.new('epoll_log.txt')
+
+#--Prints exception to STDOUT
 def print_exception(e)
-	puts "error: #{e.message}"
+	puts "#{e.message}"
 end
 
-#---Module used with eventmachine. Provides common namespace for methods used with EM.
+def clientHandler()
+	port, ip = Socket.unpack_sockaddr_in(get_peername)
+	$clientName = "#{ip}:#{port}"
+	puts "#{$clientName} connected"
+end
+
+#---Module used with eventmachine.
 module EchoServer
 	$clients = 0
 
 	def post_init
+		clientHandler
+		$log.info "#{$clientName} connected"
 		$clients += 1
-		$totalConnected += 1
+		$totalConnections += 1
 	end
 
-	def receive_data( data )
-		send_data data
-		puts "[#{$totalConnected}], Received: #{data.chomp}"
+	def receive_data data
+		$log.info "#{$clientName}_IN : #{data.bytesize}"
+		send_data "#{data}"
+		$log.info "#{$clientName}_OUT : #{data.bytesize}"
 	end
 
 	def unbind
-		puts $clients -= 1
+		$clients -= 1
 	end
 end
 
-#--Increase file descriptor limit
+#---Main
+STDOUT.sync = true
+EM.epoll
+
 begin
-	new_size = EM.set_descriptor_table_size( 10000 )
+	new_size = EM.set_descriptor_table_size( 100000 )
 rescue Exception => e
 	print_exception(e)
 end
 
-#---Main
 begin
-	EventMachine.epoll
-	EventMachine.run {
-		EventMachine.start_server '0.0.0.0', DEFAULT_PORT, EchoServer
-		puts "Server started on: #{HOST}:#{DEFAULT_PORT}"
+	EM.run{
+		EM.start_server '0.0.0.0', DEFAULT_PORT, EchoServer
+		puts "Echo Server Started on Port: #{DEFAULT_PORT}"
+		$log.info "Echo Server Started on Port: #{DEFAULT_PORT}"
 	}
-rescue SystemExit, Interrupt #---Catches Ctrl-C
+rescue SystemExit, Interrupt
 	system( "clear" )
-	puts "Maximum Connections: #{$totalConnected}"
+	puts "Maximum Connections: #{$totalConnections}"
 	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)

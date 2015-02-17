@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require "socket"
 require 'thread'
 require 'thwait'
@@ -5,10 +7,14 @@ require 'logger'
 
 
 #---Variables
-$totalClients = Integer(ARGV[1])
+DEFAULT_PORT = 8005
+$totalClients = Integer(ARGV[2])
 $ip = ARGV[0] 
-$var = 0
+$numberOfMessages = Integer(ARGV[1])
+$clientNumber = 0
 threads = Array::new
+
+#--Create log file
 log = Logger.new( 'client.txt' )
 
 
@@ -19,15 +25,22 @@ end
 
 
 #---Main
-while $var < $totalClients
-	$var += 1
-	puts "Client: #{$var}"
+STDOUT.sync = true
+
+while $clientNumber < $totalClients
+	$clientNumber += 1
+	puts "Client: #{$clientNumber}"
+
 	threads = Thread.fork() do
 		begin
-			socket = TCPSocket.open($ip, 8005)
-			socket.puts "hello world, goodbye\n"
-			line = socket.gets
-			puts line
+			socket = TCPSocket.open($ip, DEFAULT_PORT)
+
+			$numberOfMessages.times do
+				socket.write "hello world, goodbye\n"
+				response = socket.gets
+				STDOUT.puts response
+			end
+
 			sleep
 			#socket.close
 		rescue Exception => e 
