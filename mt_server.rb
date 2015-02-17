@@ -6,6 +6,7 @@ DEFAULT_PORT = 8005
 HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
 clientConnections = []
 lock = Mutex.new
+@totalConnected = 0
 log = Logger.new( 'mt_log.txt' )
 
 #---Create Server
@@ -16,7 +17,7 @@ server.setsockopt( Socket::SOL_SOCKET, Socket::SO_REUSEADDR, 1 )
 def clientHandler(client)
 	port, host = client.peeraddr[1,2]
 	clientname = "#{host}:#{port}"
-	puts "#{clientname} is connected"
+	puts "#{clientname} connected"
 end
 
 #---Prints amount of connections and closes socket
@@ -38,10 +39,11 @@ begin
 		Thread.fork(server.accept) do |client|
 			clientHandler(client)
 			clientConnections.push(client)
-			puts "Clients connected: #{clientConnections.length}"
+			@totalConnected += 1
+			#puts "Clients connected: #{clientConnections.length}"
 			loop do
 				data = client.readline
-				puts "#{data}"
+				puts "[#{@totalConnected}], Received: #{data}"
 				client.puts(data.chomp)
 
 				if client.eof?
@@ -55,6 +57,7 @@ begin
 	end
 rescue SystemExit, Interrupt #---Catches Ctrl-C
 	system( "clear" )
+	puts "Maximum Connections: #{@totalConnected}"
 	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)

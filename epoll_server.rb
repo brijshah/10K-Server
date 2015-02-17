@@ -7,6 +7,7 @@ require 'logger'
 #---Variables
 DEFAULT_PORT = 8005
 HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
+$totalConnected = 0
 log = Logger.new( 'epoll_log.txt' )
 
 #---Prints exception to STDOUT
@@ -18,13 +19,14 @@ end
 module EchoServer
 	$clients = 0
 
-	def init
-		puts $clients += 1
+	def post_init
+		$clients += 1
+		$totalConnected += 1
 	end
 
 	def receive_data( data )
 		send_data data
-		puts "Client says: #{data.chomp}"
+		puts "[#{$totalConnected}], Received: #{data.chomp}"
 	end
 
 	def unbind
@@ -48,6 +50,8 @@ begin
 	}
 rescue SystemExit, Interrupt #---Catches Ctrl-C
 	system( "clear" )
+	puts "Maximum Connections: #{$totalConnected}"
+	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)
 end

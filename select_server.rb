@@ -6,6 +6,7 @@ DEFAULT_PORT = 8005
 HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
 fileDescriptors = []
 lock = Mutex.new
+@totalConnected = 0
 log = Logger.new( 'select_log.txt' )
 
 #---Create Server
@@ -47,7 +48,8 @@ begin
 				if sock == server then
 					newSock = server.accept()
 					fileDescriptors.push( newSock )
-					puts fileDescriptors.length - 1
+					@totalConnected += 1
+					#puts fileDescriptors.length - 1
 
 				else
 					if sock.eof?
@@ -55,7 +57,7 @@ begin
 					else
 						str = sock.gets
 						sock.puts( str )
-						puts str
+						puts "[#{@totalConnected}], Received: #{str}"
 					end
 				end
 			end
@@ -63,6 +65,7 @@ begin
 	end
 rescue SystemExit, Interrupt #--catches Ctrl-c
 	system( "clear" )
+	puts "Maximum Connected: #{@totalConnected}"
 	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)

@@ -20,7 +20,8 @@ end
 
 #---Main
 while $var < $totalClients
-	puts $var += 1
+	$var += 1
+	puts "Client: #{$var}"
 	threads = Thread.fork() do
 		begin
 			socket = TCPSocket.open($ip, 8005)
