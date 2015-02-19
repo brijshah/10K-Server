@@ -41,8 +41,6 @@ require 'time'
 DEFAULT_PORT = 8005
 $clientNumber = 0
 threads = Array::new
-time_out = Time.now.to_s
-time_in = Time.now.to_s
 
 #--Create log file
 $log = Logger.new("client #{Time.now}.txt")
@@ -85,18 +83,20 @@ while $clientNumber < $totalClients
 	threads = Thread.fork() do
 		begin
 			socket = TCPSocket.open($ip, DEFAULT_PORT)
+			time_out = Time.new
 
 			time = Benchmark.measure do
 				$numberOfMessages.times do
 					message = "hello world, goodbye from #{$clientNumber}"
-					$log.info "#{$clientNumber}: out,#{time_out},#{message.bytesize}"
-					socket.puts(message)
+					$log.info "#{$clientNumber}: out,#{time_out = Time.now},#{message.bytesize}"
+					socket.puts(message.chomp)
 					response = socket.gets
-					$log.info "#{$clientNumber}: in,#{time_in},"
+					$log.info "#{$clientNumber}: in,#{Time.now},"
 					STDOUT.puts response
 				end
+				$rtt = Time.new - time_out
 			end
-			$log.info "RTT: #{Time.parse(time_out) - Time.parse(time_in)} sec"
+			$log.info "RTT: #{$rtt}"
 			$log.info "Time to execute: #{time}"
 			sleep
 			#socket.close
