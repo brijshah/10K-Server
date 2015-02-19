@@ -8,6 +8,9 @@ require 'logger'
 #---Variables
 DEFAULT_PORT = 8005
 $totalConnections = 0
+$receivedData = 0
+$sentData = 0
+$totalData = $receivedData + $sentData
 
 #--Creating log file
 $log = Logger.new('epoll_log.txt')
@@ -36,7 +39,9 @@ module EchoServer
 
 	def receive_data data
 		$log.info "#{$clientName}_IN : #{data.bytesize}"
+		$receivedData += data.bytesize
 		send_data "#{data}"
+		$sentData += data.bytesize
 		$log.info "#{$clientName}_OUT : #{data.bytesize}"
 	end
 
@@ -58,13 +63,17 @@ end
 begin
 	EM.run{
 		EM.start_server '0.0.0.0', DEFAULT_PORT, EchoServer
-		puts "Echo Server Started on Port: #{DEFAULT_PORT}"
-		$log.info "Echo Server Started on Port: #{DEFAULT_PORT}"
+		puts "Epoll Server Started on Port: #{DEFAULT_PORT}"
+		$log.info "Epoll Server Started on Port: #{DEFAULT_PORT}"
 	}
 rescue SystemExit, Interrupt
 	system( "clear" )
 	puts "Maximum Connections: #{$totalConnections}"
 	puts "User shutdown detected."
+	$log.info "Epoll Server Stopped"
+	$log.info "Total bytes transferred in: #{$receivedData}"
+	$log.info "Total bytes transferred out: #{$sentData}"
+	$log.info "Total bytes transferred: #{$receivedData + $sentData}"
 rescue Exception => e
 	print_exception(e)
 end
