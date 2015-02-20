@@ -7,7 +7,6 @@
 #--
 #-- FUNCTIONS:      
 #--                 def print_exception(e)
-#--					def current_time
 #--
 #-- DATE:           February 17, 2015
 #--
