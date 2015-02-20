@@ -37,40 +37,53 @@ require 'benchmark'
 require 'time'
 
 
-#---Variables
+#--- Variables
 DEFAULT_PORT = 8005
 $clientNumber = 0
 threads = Array::new
 
-#--Create log file
+#--- Creating Log File & set appropriate formatting
 $log = Logger.new("client #{Time.now}.txt")
 
-#---Prints exception to STDOUT
+$log.formatter = proc do |severity, datetime, progname, msg|
+	"[#{datetime.strftime('%Y-%m-%d %H:%M:%S:%L')}]: #{msg}\n"
+end
+
+
+#-----------------------------------------------------------------------------
+#-- FUNCTION:       def print_exception(e)    
+#--
+#-- DATE:           January 17, 2015
+#--
+#-- VARIABLES(S):   e is an exception
+#--
+#-- DESIGNERS:      Brij Shah
+#--
+#-- PROGRAMMERS:    Brij Shah
+#--
+#-- NOTES:
+#-- This function prints out an exception's error to STDOUT.
+#----------------------------------------------------------------------------*/
 def print_exception(e)
 	puts "error: #{e.message}"
 end
 
-#---Retreives current time from machine
-def current_time
-	t = Time.now
-	return t.strftime("%Y-%m-%d %H:%M:%S")
-end
 
-#---Main
+#--- Main
 STDOUT.sync = true
 
 if ARGV.empty? || ARGV.count > 3
 	puts "Proper usage: ruby client.rb server_addr [numberOfMessages] [numberOfClients]"
 	exit
-elsif ARGV.count == 1
+elsif ARGV.count == 1 	#user specified svr + default port + 1 client
 	$ip = ARGV[0]
-	$numberOfMessages = 1
+	$numberOfMessages = 1 	
 	$totalClients = 1
-elsif ARGV.count == 2
+elsif ARGV.count == 2 	#user specified svr + user specified port + 1 client
 	$ip = ARGV[0]
 	$numberOfMessages = Integer(ARGV[1])
 	$totalClients = 1
-elsif ARGV.count == 3
+elsif ARGV.count == 3	#user specified svr + user specified port + user specified client
 	$ip = ARGV[0]
 	$numberOfMessages = Integer(ARGV[1])
 	$totalClients = Integer(ARGV[2])
@@ -87,10 +100,10 @@ while $clientNumber < $totalClients
 
 			time = Benchmark.measure do
 				$numberOfMessages.times do
-					message = "hello world, goodbye from #{$clientNumber}"
+					message = "hello world, goodbye"
 					$log.info "#{$clientNumber}: out,#{time_out = Time.now},#{message.bytesize}"
-					socket.puts(message.chomp)
-					response = socket.gets
+					socket.write(message)
+					response = socket.read(message.bytesize)
 					$log.info "#{$clientNumber}: in,#{Time.now},"
 					STDOUT.puts response
 				end
