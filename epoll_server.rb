@@ -132,4 +132,12 @@ rescue SystemExit, Interrupt
 	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
 rescue Exception => e
 	print_exception(e)
+ensure
+	system( "clear" )
+	puts "Maximum Connections: #{$totalConnections}"
+	puts "User shutdown detected."
+	$log.info "Epoll Server Stopped"
+	$log.info "Total bytes transferred in: #{$receivedData} B"
+	$log.info "Total bytes transferred out: #{$sentData} B"
+	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
 end

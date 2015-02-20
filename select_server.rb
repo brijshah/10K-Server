@@ -167,6 +167,8 @@ rescue SystemExit, Interrupt #--catches Ctrl-c
 	sysExit
 rescue Exception => e
 	print_exception(e)
+ensure
+	sysExit
 end
 
 
