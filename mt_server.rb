@@ -132,20 +132,20 @@ begin
 	$log.info "Multi-Threaded Server started"
 	while 1
 		Thread.fork(server.accept) do |client|
-			clientHandler(client)
-			$log.info "#{$clientname} connected"
+			#clientHandler(client)
+			#$log.info "#{$clientname} connected"
 			clientConnections.push(client)
 			$totalConnected += 1
 			#puts "Clients connected: #{clientConnections.length}"
 			loop do
 				data = client.read(buffer_size)
-				$log.info "#{$clientname}_IN: #{data.bytesize}"
+				#$log.info "#{$clientname}_IN: #{data.bytesize}"
 				$receivedData += data.bytesize
 
 				#puts "[#{@totalConnected}], Received: #{data}"
 
 				client.write(data)
-				$log.info "#{$clientname}_OUT: #{data.bytesize}\n"
+				#$log.info "#{$clientname}_OUT: #{data.bytesize}\n"
 				$sentData += data.bytesize
 
 				client.flush
@@ -160,7 +160,9 @@ begin
 		end
 	end
 rescue SystemExit, Interrupt #---Catches Ctrl-C
-	sysExit
+	system( "clear" )
+	puts "Maximum Connections: #{$totalConnected}"
+	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)
 ensure

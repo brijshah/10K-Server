@@ -140,8 +140,8 @@ begin
 
 				if sock == server then
 					newSock = server.accept()
-					clientHandler(newSock)
-					$log.info "#{$clientname} connected"
+					#clientHandler(newSock)
+					#$log.info "#{$clientname} connected"
 					fileDescriptors.push( newSock )
 					@totalConnected += 1
 					#puts fileDescriptors.length - 1
@@ -151,10 +151,10 @@ begin
 						closeConnection( sock, fileDescriptors)
 					else
 						str = sock.read( buffer_size )
-						$log.info "#{$clientname}_IN : #{str.bytesize}"
+						#$log.info "#{$clientname}_IN : #{str.bytesize}"
 						$receivedData += str.bytesize
 						sock.write( str )
-						$log.info "#{$clientname}_OUT : #{str.bytesize}\n"
+						#$log.info "#{$clientname}_OUT : #{str.bytesize}\n"
 						$sentData += str.bytesize
 						sock.flush
 						#puts "[#{@totalConnected}], Received: #{str}"
@@ -164,7 +164,9 @@ begin
 		end
 	end
 rescue SystemExit, Interrupt #--catches Ctrl-c
-	sysExit
+	system("clear")
+	puts "Maximum Connected: #{@totalConnected}"
+	puts "User shutdown detected."
 rescue Exception => e
 	print_exception(e)
 ensure

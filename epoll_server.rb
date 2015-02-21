@@ -87,18 +87,18 @@ module EchoServer
 	$clients = 0
 
 	def post_init
-		clientHandler
-		$log.info "#{$clientName} connected"
+		#clientHandler
+		#$log.info "#{$clientName} connected"
 		$clients += 1
 		$totalConnections += 1
 	end
 
 	def receive_data data
-		$log.info "#{$clientName}_IN : #{data.bytesize}"
+		#$log.info "#{$clientName}_IN : #{data.bytesize}"
 		$receivedData += data.bytesize
 		send_data "#{data}"
 		$sentData += data.bytesize
-		$log.info "#{$clientName}_OUT : #{data.bytesize}\n"
+		#$log.info "#{$clientName}_OUT : #{data.bytesize}\n"
 	end
 
 	def unbind
@@ -126,10 +126,10 @@ rescue SystemExit, Interrupt
 	system( "clear" )
 	puts "Maximum Connections: #{$totalConnections}"
 	puts "User shutdown detected."
-	$log.info "Epoll Server Stopped"
-	$log.info "Total bytes transferred in: #{$receivedData} B"
-	$log.info "Total bytes transferred out: #{$sentData} B"
-	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
+	#$log.info "Epoll Server Stopped"
+	#$log.info "Total bytes transferred in: #{$receivedData} B"
+	#$log.info "Total bytes transferred out: #{$sentData} B"
+	#$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
 rescue Exception => e
 	print_exception(e)
 ensure
@@ -137,6 +137,7 @@ ensure
 	puts "Maximum Connections: #{$totalConnections}"
 	puts "User shutdown detected."
 	$log.info "Epoll Server Stopped"
+	$log.info "Maximum Connections: #{$totalConnections}"
 	$log.info "Total bytes transferred in: #{$receivedData} B"
 	$log.info "Total bytes transferred out: #{$sentData} B"
 	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
