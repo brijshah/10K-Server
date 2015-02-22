@@ -119,6 +119,7 @@ def sysExit
 	puts "Maximum Connections: #{$totalConnected}"
 	puts "User shutdown detected."
 	$log.info "Multi-Threaded Server Stopped"
+	$log.info "Maximum Connections: #{$totalConnected}"
 	$log.info "Total bytes transferred in: #{$receivedData} B"
 	$log.info "Total bytes transferred out: #{$sentData} B"
 	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
