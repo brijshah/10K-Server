@@ -1,2 +1,4 @@
 # COMP8005A2
-10K Server
+To compare the scalability and performance of the select-, multi-threaded-, and epoll based
+client-server implementations. 
+
