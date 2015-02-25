@@ -67,12 +67,15 @@ def print_exception(e)
 	puts "error: #{e.message}"
 end
 
+def message_generator(buffer_size)
+	str = "A" * buffer_size
+end
 
 #--- Main
 STDOUT.sync = true
 
-if ARGV.empty? || ARGV.count > 3
-	puts "Proper usage: ruby client.rb server_addr [numberOfMessages] [numberOfClients]"
+if ARGV.empty? || ARGV.count > 4
+	puts "Proper usage: ruby client.rb server_addr [numberOfMessages] [numberOfClients] [buffersize]"
 	exit
 elsif ARGV.count == 1 	#user specified svr + default port + 1 client
 	$ip = ARGV[0]
@@ -86,6 +89,11 @@ elsif ARGV.count == 3	#user specified svr + user specified port + user specified
 	$ip = ARGV[0]
 	$numberOfMessages = Integer(ARGV[1])
 	$totalClients = Integer(ARGV[2])
+elsif ARGV.count == 4
+	$ip = ARGV[0]
+	$numberOfMessages = Integer(ARGV[1])
+	$totalClients = Integer(ARGV[2])
+	$buf = Integer(ARGV[3])
 end
 
 while $clientNumber < $totalClients
@@ -97,9 +105,8 @@ while $clientNumber < $totalClients
 			socket = TCPSocket.open($ip, DEFAULT_PORT)
 			time_out = Time.new
 
-			time = Benchmark.measure do
 				$numberOfMessages.times do
-					message = "hello world, goodbye"
+					message = message_generator($buf).to_s
 					$log.info "#{$clientNumber}: out,#{time_out = Time.now},#{message.bytesize}"
 					socket.write(message)
 					response = socket.read(message.bytesize)
@@ -107,9 +114,7 @@ while $clientNumber < $totalClients
 					STDOUT.puts response
 				end
 				$rtt = Time.new - time_out
-			end
 			$log.info "RTT: #{$rtt}"
-			$log.info "Time to execute: #{time}"
 			sleep
 			#socket.close
 		rescue Exception => e 

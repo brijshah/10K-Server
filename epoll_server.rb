@@ -82,6 +82,17 @@ def clientHandler()
 	puts "#{$clientName} connected"
 end
 
+def sysExit
+		system( "clear" )
+	puts "Maximum Connections: #{$totalConnections}"
+	puts "Logging Statistics...."
+	$log.info "Epoll Server Stopped"
+	$log.info "Maximum Connections: #{$totalConnections}"
+	$log.info "Total bytes transferred in: #{$receivedData} B"
+	$log.info "Total bytes transferred out: #{$sentData} B"
+	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
+end
+
 #---Module used with eventmachine.
 module EchoServer
 	$clients = 0
@@ -126,19 +137,8 @@ rescue SystemExit, Interrupt
 	system( "clear" )
 	puts "Maximum Connections: #{$totalConnections}"
 	puts "User shutdown detected."
-	#$log.info "Epoll Server Stopped"
-	#$log.info "Total bytes transferred in: #{$receivedData} B"
-	#$log.info "Total bytes transferred out: #{$sentData} B"
-	#$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
 rescue Exception => e
 	print_exception(e)
 ensure
-	system( "clear" )
-	puts "Maximum Connections: #{$totalConnections}"
-	puts "User shutdown detected."
-	$log.info "Epoll Server Stopped"
-	$log.info "Maximum Connections: #{$totalConnections}"
-	$log.info "Total bytes transferred in: #{$receivedData} B"
-	$log.info "Total bytes transferred out: #{$sentData} B"
-	$log.info "Total bytes transferred: #{$receivedData + $sentData} B"
+	sysExit
 end

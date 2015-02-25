@@ -35,7 +35,7 @@ DEFAULT_PORT = 8005
 HOST = Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
 fileDescriptors = []
 lock = Mutex.new
-buffer_size = 20
+$buffer_size = 20
 @totalConnected = 0
 $receivedData = 0
 $sentData = 0
@@ -117,7 +117,7 @@ end
 def sysExit
 	system( "clear" )
 	puts "Maximum Connected: #{@totalConnected}"
-	puts "User shutdown detected."
+	puts "Logging Statistics...."
 	$log.info "Select Server Stopped"
 	$log.info "Maximum Connections: #{$totalConnected}"
 	$log.info "Total bytes transferred in: #{$receivedData} B"
@@ -126,7 +126,16 @@ def sysExit
 end
 
 #---Main
+STDOUT.sync = true
+
 fileDescriptors.push( server )
+
+if ARGV.empty? || ARGV.count > 1
+	puts "Usage: ruby select_server.rb [buffer_size]"
+	exit
+elsif ARGV.count == 1
+	$buffer_size = ARGV[0].to_i
+end
 
 begin
 	puts "Server started on: #{HOST}:#{DEFAULT_PORT}"
@@ -151,7 +160,7 @@ begin
 					if sock.eof?
 						closeConnection( sock, fileDescriptors)
 					else
-						str = sock.read( buffer_size )
+						str = sock.read( $buffer_size )
 						#$log.info "#{$clientname}_IN : #{str.bytesize}"
 						$receivedData += str.bytesize
 						sock.write( str )

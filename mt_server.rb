@@ -37,7 +37,7 @@ DEFAULT_PORT = 8005
 clientConnections = []
 lock = Mutex.new
 $totalConnected = 0
-buffer_size = 20
+$buffer_size = 20
 $receivedData = 0
 $sentData = 0
 
@@ -117,7 +117,7 @@ end
 def sysExit
 	system( "clear" )
 	puts "Maximum Connections: #{$totalConnected}"
-	puts "User shutdown detected."
+	puts "Logging Statistics...."
 	$log.info "Multi-Threaded Server Stopped"
 	$log.info "Maximum Connections: #{$totalConnected}"
 	$log.info "Total bytes transferred in: #{$receivedData} B"
@@ -127,6 +127,13 @@ end
 
 #---Main
 STDOUT.sync = true
+
+if ARGV.empty? || ARGV.count > 1
+	puts "Usage: ruby mt_server.rb [buffer_size]"
+	exit
+elsif ARGV.count == 1
+	$buffer_size = ARGV[0].to_i
+end
 
 begin
 	puts "Multi-Threaded Server started port on: #{DEFAULT_PORT}"
@@ -139,7 +146,7 @@ begin
 			$totalConnected += 1
 			#puts "Clients connected: #{clientConnections.length}"
 			loop do
-				data = client.read(buffer_size)
+				data = client.read($buffer_size)
 				#$log.info "#{$clientname}_IN: #{data.bytesize}"
 				$receivedData += data.bytesize
 
